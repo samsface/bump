@@ -92,14 +92,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void onShareButtonClick() {
-
-        File f = this.getFileStreamPath("session.txt");
-
-        Uri contentUri = FileProvider.getUriForFile(this, "com.example.myapplication", f);
+        Uri uri = FileProvider.getUriForFile(this, "com.example.myapplication", this.getFileStreamPath("session.txt"));
 
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, contentUri);
+        sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
         startActivity(Intent.createChooser(sharingIntent, "Share using"));
     }
 

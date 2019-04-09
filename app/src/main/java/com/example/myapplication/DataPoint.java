@@ -7,4 +7,8 @@ public class DataPoint {
     float accelerometer_x = 0.0f;
     float accelerometer_y = 0.0f;
     float accelerometer_z = 0.0f;
+
+    public String to_csv() {
+        return time + "," + latitude + "," + longitude + "," + accelerometer_x + "," + accelerometer_y + "," + accelerometer_z + "\n";
+    }
 }

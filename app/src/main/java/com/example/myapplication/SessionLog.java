@@ -12,36 +12,32 @@ import java.util.Vector;
 public class SessionLog {
 
     private Context context;
-    private Vector<String> buffer;
+    private String buffer;
 
     public SessionLog(Context context) {
         this.context = context;
-        buffer = new Vector<>();
         reset();
     }
 
     public void write(DataPoint dataPoint) {
 
-        buffer.add(dataPoint.time + "," + dataPoint.latitude + "\n");
+        buffer += dataPoint.to_csv();
 
-        if(buffer.size() > 50) {
+        if(buffer.length() > 1024) {
             flush();
         }
     }
 
     public void reset() {
-        File f = context.getFileStreamPath("session.txt");
-        f.delete();
+        buffer = "";
+        context.getFileStreamPath("session.txt").delete();
     }
 
     public void flush() {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("session.txt", Context.MODE_APPEND));
-            for(String s : buffer) {
-                outputStreamWriter.write(s);
-            }
-            buffer.clear();
-            outputStreamWriter.close();
+            OutputStreamWriter writer = new OutputStreamWriter(context.openFileOutput("session.txt", Context.MODE_APPEND));
+            writer.write(buffer);
+            buffer = "";
         }
         catch (IOException e) {
         }
