@@ -39,12 +39,16 @@ public class Session {
         return state;
     }
 
+    public DataPoint getLastDataPoint() {
+        return lastDataPoint;
+    }
+
     public void onAccelerometerEvent(long time, float x, float y, float z) {
         if(getState() != State.STARTED) {
             return;
         }
 
-        lastDataPoint.time = System.currentTimeMillis();
+        lastDataPoint.time = time;
         lastDataPoint.accelerometer_x = x;
         lastDataPoint.accelerometer_y = y;
         lastDataPoint.accelerometer_z = z;
@@ -56,24 +60,11 @@ public class Session {
         if(getState() != State.STARTED) {
             return;
         }
-        // geo comes in from gps & network so ignore late updates
-        if(time < lastDataPoint.time) {
-            return;
-        }
 
-        lastDataPoint.time = System.currentTimeMillis();
+        lastDataPoint.time = time;
         lastDataPoint.latitude = latitude;
         lastDataPoint.longitude = longitude;
 
         sessionLog.write(lastDataPoint);
-    }
-
-    public float getBumpScore() {
-        if(lastDataPoint == null) {
-            return 0.0f;
-        }
-        else {
-            return lastDataPoint.accelerometer_y;
-        }
     }
 }

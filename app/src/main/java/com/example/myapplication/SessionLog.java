@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 import android.content.Context;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -21,7 +20,7 @@ public class SessionLog {
 
     public void write(DataPoint dataPoint) {
 
-        buffer += dataPoint.to_csv();
+        buffer += dataPoint.toString();
 
         if(buffer.length() > 1024) {
             flush();
