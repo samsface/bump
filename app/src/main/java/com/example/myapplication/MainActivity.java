@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.StrictMode;
@@ -10,21 +13,20 @@ import android.hardware.SensorEventListener;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
-
-    private SensorManager senSensorManager;
-    private Sensor senAccelerometer;
-
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "CycleCrowd";
     private TextView bump_score_txt;
     private Button start_button;
     private Button share_button;
-
+    private PendingIntent scheduledIntent;
+    private AlarmManager scheduler;
     Session session;
 
     @Override
@@ -51,10 +53,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        senSensorManager = (SensorManager) getSystemService(this.SENSOR_SERVICE);
-        senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
-
         session = new Session(this);
 
         redraw();
@@ -72,11 +70,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (session.getState())
         {
             case STARTED:
+                Log.d(TAG, "stop clicked");
+                scheduler = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                scheduler.cancel(scheduledIntent);
+                Intent myService = new Intent(MainActivity.this, BumpMonitorService.class);
+                stopService(myService);
                 session.stopSession();
                 break;
             case STOPPED:
             case NONE:
                 session.startSession();
+                Log.d(TAG,"started session");
+                scheduler = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                Intent intent = new Intent(this, BumpMonitorService.class);
+                scheduledIntent = PendingIntent.getService(getApplicationContext(),0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                scheduler.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 , scheduledIntent);
                 break;
         }
 
@@ -108,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    @Override
+
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             session.onAccelerometerEvent(event.values[0], event.values[1], event.values[2]);
@@ -116,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    @Override
+
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
