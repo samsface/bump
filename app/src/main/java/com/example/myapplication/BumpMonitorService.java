@@ -9,12 +9,16 @@ import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
 
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
+
 
 public class BumpMonitorService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor senAccelerometer;
     private long lastUpdate = 0;
     private static final String TAG = "CycleCrowd";
+    private static PublishSubject<DataPoint> current = PublishSubject.create();
 
     public BumpMonitorService() {
     }
@@ -38,14 +42,16 @@ public class BumpMonitorService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         Sensor mySensor = event.sensor;
         if(mySensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
+            DataPoint dp = new DataPoint();
+            dp.accelerometer_x = event.values[0];
+            dp.accelerometer_y = event.values[1];
+            dp.accelerometer_z = event.values[2];
+            current.onNext(dp);
             long curTime = System.currentTimeMillis();
             if((curTime - lastUpdate) >100){
                 long diffTime = (curTime - lastUpdate);
                 lastUpdate = curTime;
-                Log.d(TAG,String.format("x: %f, y: %f, z: %f",x,y,z));
+                Log.d(TAG,String.format("x: %f, y: %f, z: %f",dp.accelerometer_x,dp.accelerometer_y,dp.accelerometer_z));
             }
         }
     }
@@ -66,6 +72,10 @@ public class BumpMonitorService extends Service implements SensorEventListener {
         Log.d(TAG,"onDestroy");
         super.onDestroy();
         sensorManager.unregisterListener(this);
+    }
+
+    public static Observable<DataPoint> getObservable(){
+        return current;
     }
 
 }
