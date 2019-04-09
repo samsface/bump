@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.StrictMode;
 import android.support.v4.content.FileProvider;
@@ -14,7 +16,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -84,10 +92,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void onShareButtonClick() {
-        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+
+        File f = this.getFileStreamPath("session.txt");
+
+        Uri contentUri = FileProvider.getUriForFile(this, "com.example.myapplication", f);
+
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File("session.txt")));
-        startActivity(Intent.createChooser(sharingIntent, "Share via"));
+        sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, contentUri);
+        startActivity(Intent.createChooser(sharingIntent, "Share using"));
     }
 
     private void redraw() {

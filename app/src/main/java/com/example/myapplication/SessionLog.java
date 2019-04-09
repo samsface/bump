@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Context;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,17 +30,13 @@ public class SessionLog {
     }
 
     public void reset() {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("session.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-        }
+        File f = context.getFileStreamPath("session.txt");
+        f.delete();
     }
 
     public void flush() {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("session.txt", Context.MODE_APPEND | Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("session.txt", Context.MODE_APPEND));
             for(String s : buffer) {
                 outputStreamWriter.write(s);
             }
