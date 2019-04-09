@@ -39,7 +39,7 @@ public class Session {
         return state;
     }
 
-    public void onAccelerometerEvent(float x, float y, float z) {
+    public void onAccelerometerEvent(long time, float x, float y, float z) {
         if(getState() != State.STARTED) {
             return;
         }
@@ -52,8 +52,12 @@ public class Session {
         sessionLog.write(lastDataPoint);
     }
 
-    public void onGeoEvent(long latitude, long longitude) {
+    public void onGeoEvent(long time, double latitude, double longitude) {
         if(getState() != State.STARTED) {
+            return;
+        }
+        // geo comes in from gps & network so ignore late updates
+        if(time < lastDataPoint.time) {
             return;
         }
 
